@@ -1,0 +1,8 @@
+---
+mosquitto_ansible_role:
+  # TODO list the package names for each distro
+  # TODO definitelly archlinux specific package names
+  mosquitto_packages:
+    - docbook-xsl
+    - c-ares
+    - python2
