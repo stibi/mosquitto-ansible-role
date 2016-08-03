@@ -1,6 +1,12 @@
 ---
 # defaults file for mosquitto-arch-ansible-role
 paths:
-  cafile: "/etc/mosquitto/ca/ca.crt"
-  certfile: "/etc/mosquitto/certs/{{ ansible_hostname }}.crt"
-  keyfile: "/etc/mosquitto/certs/{{ ansible_hostname }}.key"
+  cadirectory: "/etc/mosquitto/ca"
+  certsdirectory: "/etc/mosquitto/certs"
+  cafile: "ca.crt"
+  certfile: "{{ ansible_hostname }}.crt"
+  keyfile: "{{ ansible_hostname }}.key"
+
+options:
+  require_certificate: "false"  # "false": client does not present its cert, 
+                                # "true": vice-versa
