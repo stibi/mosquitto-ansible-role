@@ -201,9 +201,9 @@
     - 'listener 1883 127.0.0.1'
     - 'listener 8883'
     - 'tls_version tlsv1'
-    - 'cafile /etc/mosquitto/ca/ca.crt'
-    - 'certfile /etc/mosquitto/certs/{{ ansible_hostname }}.crt'
-    - 'keyfile /etc/mosquitto/certs/{{ ansible_hostname }}.key'
+    - 'cafile {{paths.cafile}}'
+    - 'certfile {{paths.certfile}}'
+    - 'keyfile {{paths.keyfile}}'
     - 'require_certificate true'
   when: hostcrt.stat.exists == False
 
