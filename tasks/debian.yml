@@ -174,7 +174,7 @@
     create=yes
     state=present
   with_items:
-    - '# Ansible playbook: Mosquitto Broker ( http://thad.getterman.org/post/110821419248/ansible-playbook-install-mosquitto-with-ssl )'
+    - '# Ansible playbook: Mosquitto Broker ( https://github.com/quantitec/mosquitto-ansible-role )'
     - '#'
     - 'allow_anonymous false'
     - 'autosave_interval 1800'
