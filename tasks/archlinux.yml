@@ -5,7 +5,7 @@
   pacman: >
     name={{ item }}
     state=present
-  with_items: mosquitto_ansible_role.mosquitto_packages
+  with_items: '{{mosquitto_ansible_role.mosquitto_packages}}'
   tags: [mosquitto]
 
 # TODO this way only on Archlinux
