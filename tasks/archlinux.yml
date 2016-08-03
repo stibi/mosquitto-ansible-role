@@ -1,0 +1,75 @@
+---
+# TODO use action and host package manager
+- name: Install mosquitto dependencies
+  sudo: yes
+  pacman: >
+    name={{ item }}
+    state=present
+  with_items: mosquitto_ansible_role.mosquitto_packages
+  tags: [mosquitto]
+
+# TODO this way only on Archlinux
+- name: Check if mosquitto is already installed
+  command: pacman -Q mosquitto
+  register: mosquitto_install_check
+  # Normally, the task would fail because of not found package
+  ignore_errors: True
+  tags: [mosquitto]
+
+# TODO only on Archlinux
+# TODO add "when" with condition for Archlinux as platform
+- name: Download mosquitto PKGBUILD tarball from AUR
+  get_url: >
+    dest=/tmp/
+    url="https://aur.archlinux.org/packages/mo/mosquitto/mosquitto.tar.gz"
+  when: "'was not found' in mosquitto_install_check.stderr"
+  tags: [mosquitto]
+
+# TODO only on Archlinux
+- name: Unpack mosquitto PKGBUILD tarball
+  unarchive: >
+    src=/tmp/mosquitto.tar.gz
+    dest=/tmp/
+    copy=no
+    creates=/tmp/mosquitto
+  when: "'was not found' in mosquitto_install_check.stderr"
+  tags: [mosquitto]
+
+# TODO only on Archlinux
+- name: Build mosquitto
+  command: makepkg -c PKGBUILD
+  args:
+    chdir: /tmp/mosquitto/
+    # Not really reliable, hardcoding the package name here
+    creates: /tmp/mosquitto/mosquitto-1.3.5-3-armv6h.pkg.tar.xz
+  when: "'was not found' in mosquitto_install_check.stderr"
+  tags: [mosquitto]
+
+# TODO only on Archlinux
+- name: Install mosquitto
+  sudo: yes
+  command: pacman --noconfirm -U /tmp/mosquitto/mosquitto-1.3.5-3-armv6h.pkg.tar.xz
+  args:
+    chdir: /tmp/mosquitto/
+  when: "'was not found' in mosquitto_install_check.stderr"
+  tags: [mosquitto]
+
+# TODO only on Archlinux
+# Because the path to config file will be different on other distros I guess
+- name: Use mosquitto.conf.example as the config file
+  sudo: yes
+  command: cp /etc/mosquitto/mosquitto.conf.example /etc/mosquitto/mosquitto.conf
+  args:
+    creates: /etc/mosquitto/mosquitto.conf
+  when: "'was not found' in mosquitto_install_check.stderr"
+  tags: [mosquitto]
+
+# TODO only on archlinux
+# service name maybe different on other distros?
+- name: Enable and start mosquitto
+  sudo: yes
+  service: >
+    name=mosquitto
+    enabled=true
+    state=started
+  tags: [mosquitto]
