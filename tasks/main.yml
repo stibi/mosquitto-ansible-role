@@ -2,8 +2,8 @@
 # Tasks to install mosquitto on different OSs
 - name: "Install for Debian based OSs"
   include: debian.yml
-  when: '{{ ansible_os_family }}' == "Debian"
+  when: ansible_os_family == "Debian"
 
 - name: "Install on ArchLinux"
   include: archlinux.yml
-  when: '{{ ansible_os_family }}' == "Archlinux"
+  when: ansible_os_family == "Archlinux"

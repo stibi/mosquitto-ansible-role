@@ -1,2 +1,4 @@
 ---
 # defaults file for mosquitto-arch-ansible-role
+paths:
+  cafile: "/etc/mosquitto/ca/ca.crt"
