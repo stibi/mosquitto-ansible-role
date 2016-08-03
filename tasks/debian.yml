@@ -38,7 +38,7 @@
 
 - name: Create certificate authority directory
   file: >
-    path=/etc/mosquitto/ca/
+    path={{paths.cadirectory}}
     state=directory
     owner=mosquitto
     group=mosquitto
@@ -201,10 +201,10 @@
     - 'listener 1883 127.0.0.1'
     - 'listener 8883'
     - 'tls_version tlsv1'
-    - 'cafile {{paths.cafile}}'
-    - 'certfile {{paths.certfile}}'
-    - 'keyfile {{paths.keyfile}}'
-    - 'require_certificate true'
+    - 'cafile {{paths.cadirectory}}/{{paths.cafile}}'
+    - 'certfile {{paths.certsdirectory}}/{{paths.certfile}}'
+    - 'keyfile {{paths.certsdirectory}}/{{paths.keyfile}}'
+    - 'require_certificate {{options.require_certificate}}'
   when: hostcrt.stat.exists == False
 
 - name: Permissions for /etc/mosquitto/
