@@ -61,10 +61,6 @@
     removes: /etc/mosquitto/certs/{{ ansible_hostname }}.key
     creates: /etc/mosquitto/certs/{{ ansible_hostname }}.crt
 
-- name: Check existence of host crt file
-  stat: path=/etc/mosquitto/certs/{{ ansible_hostname }}.crt
-  register: hostcrt
-
 - name: Creating certificate extensions file
   command: mktemp /tmp/ansible.XXXXXXXXX
   register: tmp_file

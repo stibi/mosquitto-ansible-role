@@ -1,7 +1,7 @@
 ---
 # defaults file for mosquitto-arch-ansible-role
-write_custom_config: false
-generate_certs: false
+write_custom_config: true
+generate_certs: false  # do not set to true if you already have the certs
 paths:
   cadirectory: "/etc/mosquitto/ca"
   certsdirectory: "/etc/mosquitto/certs"

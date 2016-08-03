@@ -21,10 +21,16 @@
     - mosquitto-clients
     - python-mosquitto
 
-- debug: msg={{write_custom_config}}
+- name: Check existence of host crt file
+  stat: path={{paths.certsdirectory}}/{{ paths.certfile }}
+  register: hostcrt
 
-- debug: msg="Hello there"
-  when: write_custom_config
+- fail: msg="No certificate found and generate_certs is false"
+  when: (hostcrt.stat.exists == False) and (generate_certs == False)
+
+- name: Generate certificates
+  include: certgen.yml
+  when: generate_certs
 
 - name: Write custom configuration
   include: custom_config.yml
@@ -44,10 +50,6 @@
   user: >
     name=mosquitto
     group=mosquitto
-
-- name: Generate certificates
-  include: certgen.yml
-  when: generate_certs
 
 - name: Mosquitto verison and service restart
   shell: 'mosquitto --help | head -n1 | egrep -o "([0-9]{1,}\.)+[0-9]{1,}"'
