@@ -1,5 +1,6 @@
 ---
 # defaults file for mosquitto-arch-ansible-role
+enable_TLS: True
 paths:
   cadirectory: "/etc/mosquitto/ca"
   certsdirectory: "/etc/mosquitto/certs"
@@ -10,3 +11,4 @@ paths:
 options:
   require_certificate: "false"  # "false": client does not present its cert, 
                                 # "true": vice-versa
+  allow_anonymous: "true"

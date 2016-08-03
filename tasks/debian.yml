@@ -174,37 +174,43 @@
     create=yes
     state=present
   with_items:
-    - '# Ansible playbook: Mosquitto Broker ( https://github.com/quantitec/mosquitto-ansible-role )'
-    - '#'
-    - 'allow_anonymous false'
-    - 'autosave_interval 1800'
-    - 'connection_messages true'
-    - 'log_dest stderr'
-    - 'log_dest topic'
-    - 'log_type error'
-    - 'log_type warning'
-    - 'log_type notice'
-    - 'log_type information'
-    - 'log_type all'
-    - 'log_type debug'
-    - 'log_timestamp true'
-    - '#message_size_limit 10240'
-    - '#password_file jp.pw'
-    - '#acl_file jp.acl'
-    - 'persistence true'
-    - '#persistence_location /tmp/'
-    - 'persistence_file mosquitto.db'
-    - 'persistent_client_expiration 1m'
-    - '#pid_file xxxx'
-    - 'retained_persistence true'
-    - '#listener 1883'
     - 'listener 1883 127.0.0.1'
     - 'listener 8883'
     - 'tls_version tlsv1'
     - 'cafile {{paths.cadirectory}}/{{paths.cafile}}'
     - 'certfile {{paths.certsdirectory}}/{{paths.certfile}}'
     - 'keyfile {{paths.certsdirectory}}/{{paths.keyfile}}'
-    - 'require_certificate {{options.require_certificate}}'
+    # - '# Ansible playbook: Mosquitto Broker ( https://github.com/quantitec/mosquitto-ansible-role )'
+    # - '#'
+    # - 'allow_anonymous {{options.allow_anonymous}}'
+    # - 'autosave_interval 1800'
+    # - 'connection_messages true'
+    # - 'log_dest stderr'
+    # - 'log_dest topic'
+    # - 'log_type error'
+    # - 'log_type warning'
+    # - 'log_type notice'
+    # - 'log_type information'
+    # - 'log_type all'
+    # - 'log_type debug'
+    # - 'log_timestamp true'
+    # - '#message_size_limit 10240'
+    # - '#password_file jp.pw'
+    # - '#acl_file jp.acl'
+    # - '#persistence false'
+    # - '#persistence_location /tmp/'
+    # - '#persistence_file mosquitto.db'
+    # - '#persistent_client_expiration 1m'
+    # - '#pid_file xxxx'
+    # - '#retained_persistence true'
+    # - '#listener 1883'
+    # - 'listener 1883 127.0.0.1'
+    # - 'listener 8883'
+    # - 'tls_version tlsv1'
+    # - 'cafile {{paths.cadirectory}}/{{paths.cafile}}'
+    # - 'certfile {{paths.certsdirectory}}/{{paths.certfile}}'
+    # - 'keyfile {{paths.certsdirectory}}/{{paths.keyfile}}'
+    # - 'require_certificate {{options.require_certificate}}'
   when: hostcrt.stat.exists == False
 
 - name: Permissions for /etc/mosquitto/
@@ -215,28 +221,28 @@
     mode="o-rwx"
     state=directory
     recurse=yes
-- name: Permisions for certificates
-  file: >
-    path=/etc/mosquitto/{{ item }}
-    owner=mosquitto
-    group=mosquitto
-    mode=0440
-    state=file
-  with_items:
-    - 'ca/ca.crt'
-    - 'ca/ca.srl'
-    - 'certs/{{ ansible_hostname }}.crt'
+# - name: Permisions for certificates
+#   file: >
+#     path=/etc/mosquitto/{{ item }}
+#     owner=mosquitto
+#     group=mosquitto
+#     mode=0440
+#     state=file
+#   with_items:
+#     - 'ca/ca.crt'
+#     - 'ca/ca.srl'
+#     - 'certs/{{ ansible_hostname }}.crt'
 
-- name: Permisions for keys
-  file: >
-    path=/etc/mosquitto/{{ item }}
-    owner=mosquitto
-    group=mosquitto
-    mode=0400
-    state=file
-  with_items:
-    - 'ca/ca.key'
-    - 'certs/{{ ansible_hostname }}.key'
+# - name: Permisions for keys
+#   file: >
+#     path=/etc/mosquitto/{{ item }}
+#     owner=mosquitto
+#     group=mosquitto
+#     mode=0400
+#     state=file
+#   with_items:
+#     - 'ca/ca.key'
+#     - 'certs/{{ ansible_hostname }}.key'
 
 - name: Permissions for /etc/mosquitto/certs/
   file: >
