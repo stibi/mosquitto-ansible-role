@@ -16,10 +16,10 @@
     update_cache=yes
     pkg={{ item }}
     state=installed
-    with_items:
-      - mosquitto
-      - mosquitto-clients
-      - python-mosquitto
+  with_items:
+    - mosquitto
+    - mosquitto-clients
+    - python-mosquitto
 
 - name: Stop Mosquitto service
   service: >

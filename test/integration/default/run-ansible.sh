@@ -6,5 +6,5 @@ cd /vagrant
 bash install-ansible.sh 
 
 # Run test playbook
-cd /home/vagrant/ansible-role-docker/test/integration/default/
+cd /home/vagrant/mosquitto-ansible-role/test/integration/default/
 ansible-playbook default.yml
