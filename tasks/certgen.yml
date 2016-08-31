@@ -1,0 +1,127 @@
+---
+- name: Create certificate authority directory
+  file: >
+    path={{paths.cadirectory}}
+    state=directory
+    owner=mosquitto
+    group=mosquitto
+    mode="u=rwx,g=rx,o-rwx"
+
+- name: Generate a certificate request
+  command: >
+    /usr/bin/openssl \
+    req \
+    -nodes \
+    -new \
+    -newkey rsa:4096 \
+    -x509 \
+    -days 365 \
+    -extensions v3_ca \
+    -keyout /etc/mosquitto/ca/ca.key \
+    -out /etc/mosquitto/ca/ca.crt \
+    -subj "/CN=An MQTT broker/O=MQTTitude.org/emailAddress=nobody@example.net"
+  args:
+    creates: /etc/mosquitto/ca/ca.crt
+
+- name: Create symbolic link for ca.crt
+  file: >
+    src=/etc/mosquitto/ca/ca.crt
+    dest=/etc/mosquitto/ca_certificates/ca.crt
+    state=link
+
+- name: Generate a self-signed key
+  command: >
+    /usr/bin/openssl \
+    x509 \
+    -in /etc/mosquitto/ca/ca.crt \
+    -nameopt multiline \
+    -subject \
+    -noout
+  args:
+    creates: /etc/mosquitto/certs/{{ ansible_hostname }}.key
+
+- name: Generate RSA private key for host
+  command: >
+    /usr/bin/openssl \
+    genrsa \
+    -out /etc/mosquitto/certs/{{ ansible_hostname }}.key \
+    4096
+  args:
+    creates: /etc/mosquitto/certs/{{ ansible_hostname }}.key
+
+- name: Generating a CSR from existing RSA private key for host
+  command: >
+    /usr/bin/openssl \
+    req \
+    -new \
+    -key /etc/mosquitto/certs/{{ ansible_hostname }}.key \
+    -out /etc/mosquitto/certs/{{ ansible_hostname }}.csr \
+    -subj /CN={{ ansible_hostname }}/O={{ ansible_fqdn }}/emailAddress=root@{{ ansible_fqdn }}
+  args:
+    removes: /etc/mosquitto/certs/{{ ansible_hostname }}.key
+    creates: /etc/mosquitto/certs/{{ ansible_hostname }}.crt
+
+- name: Creating certificate extensions file
+  command: mktemp /tmp/ansible.XXXXXXXXX
+  register: tmp_file
+  when: hostcrt.stat.exists == False
+
+- name: Writing to certificate extensions file
+  lineinfile: >
+    dest='{{ tmp_file.stdout }}'
+    line='{{ item }}'
+    create=no
+    state=present
+  with_items:
+    - '[ JPMextensions ]'
+    - 'basicConstraints        = critical,CA:false'
+    - 'nsCertType              = server'
+    - 'keyUsage                = nonRepudiation, digitalSignature, keyEncipherment'
+    - 'nsComment               = "Broker Certificate"'
+    - 'subjectKeyIdentifier    = hash'
+    - 'authorityKeyIdentifier  = keyid,issuer:always'
+    - '# subjectAltName          = $ENV::SUBJALTNAME'
+    - '# issuerAltName           = issuer:copy'
+    - '#nsCaRevocationUrl       = http://mqttitude.org/carev/'
+    - '#nsRevocationUrl         = http://mqttitude.org/carev/'
+    - 'certificatePolicies     = ia5org,@polsection'
+    - '# '
+    - '[polsection]'
+    - 'policyIdentifier            = 1.3.5.8'
+    - 'CPS.1               = "http://localhost"'
+    - 'userNotice.1        = @notice'
+    - '# '
+    - '[notice]'
+    - 'explicitText            = "This CA is for a local MQTT broker installation only"'
+    - 'organization            = "MQTTitude"'
+    - 'noticeNumbers           = 1'
+  when: hostcrt.stat.exists == False
+
+- name: Sign certificate request with certificate extensions file
+  command: >
+    /usr/bin/openssl \
+    x509 \
+    -req \
+    -in /etc/mosquitto/certs/{{ ansible_hostname }}.csr \
+    -CA /etc/mosquitto/ca/ca.crt \
+    -CAkey /etc/mosquitto/ca/ca.key \
+    -CAcreateserial \
+    -CAserial /etc/mosquitto/ca/ca.srl \
+    -out /etc/mosquitto/certs/{{ ansible_hostname }}.crt \
+    -days 365 \
+    -extfile {{ tmp_file.stdout }} \
+    -extensions JPMextensions
+  args:
+    creates: /etc/mosquitto/certs/{{ ansible_hostname }}.crt
+  when: hostcrt.stat.exists == False
+
+- name: 'Clean-up: host csr'
+  file: >
+    path=/etc/mosquitto/certs/{{ ansible_hostname }}.csr
+    state=absent
+     
+- name: 'Clean-up: certificate extensions file'
+  file: >
+    path={{ tmp_file.stdout }}
+    state=absent
+  when: hostcrt.stat.exists == False

@@ -7,3 +7,40 @@
 - name: "Install on ArchLinux"
   include: archlinux.yml
   when: ansible_os_family == "Archlinux"
+
+- name: Check existence of host crt file
+  stat: path={{paths.certsdirectory}}/{{ paths.certfile }}
+  register: hostcrt
+
+- fail: msg="No certificate found and generate_certs is false"
+  when: (hostcrt.stat.exists == False) and (generate_certs == False)
+
+- name: Generate certificates
+  include: certgen.yml
+  when: generate_certs
+
+- name: Write custom configuration
+  include: custom_config.yml
+  when: write_custom_config
+
+- name: Stop Mosquitto service
+  service: >
+    name=mosquitto
+    state=stopped
+    
+- name: Create mosquitto group
+  group: >
+    name=mosquitto
+    state=present
+     
+- name: Set primary group to mosquitto
+  user: >
+    name=mosquitto
+    group=mosquitto
+
+- name: Mosquitto verison and service restart
+  shell: 'mosquitto --help | head -n1 | egrep -o "([0-9]{1,}\.)+[0-9]{1,}"'
+  notify: restart mosquitto service
+  register: mosquittoVersion
+
+- debug: msg=Installed Mosquitto version {{ mosquittoVersion.stdout }}
