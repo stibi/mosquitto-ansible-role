@@ -1,2 +1,7 @@
 ---
 # handlers file for mosquitto-arch-ansible-role
+- name: restart mosquitto service
+  service: >
+    name=mosquitto
+    enabled=yes
+    state=restarted
